@@ -8,14 +8,75 @@ import { MDBFooter } from 'mdb-react-ui-kit';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import React, { useEffect, useState } from 'react';
 
 function Home() {
-  return <div>Home</div>
+  return <div className='vh-100'>Home</div>
 }
 
 function Products() {
-  return <div>Products</div>
-}
+
+  const url = 'https://v2.api.noroff.dev/online-shop';
+
+    const [posts, setPosts] = useState([]);
+    // State for holding our loading state
+    const [isLoading, setIsLoading] = useState(false);
+    // State for holding our error state
+    const [isError, setIsError] = useState(false);
+  
+    useEffect(() => {
+      async function getData() {
+        try {
+          // Reset the error state in case there as an error previously
+          setIsError(false);
+          // Turn on the loading state each time we do an API call
+          setIsLoading(true);
+          const response = await fetch(url);
+          const json = await response.json();
+          console.log(json.data);
+          console.log(response);
+          setPosts(json.data);
+          // Clear the loading state once we've successfully got our data
+          setIsLoading(false);
+        } catch (error) {
+          // Clear the loading state if we get an error and then
+          // set our error state to true
+          setIsLoading(false);
+          setIsError(true);
+        }
+      }
+  
+      getData();
+    }, []);
+  
+    if (isLoading) {
+      return <div>Loading posts</div>;
+    }
+  
+    if (isError) {
+      return <div>Error loading data</div>;
+    }
+  
+    return (
+      <div className='mx-5'> <h1 className="text-center p-3">Products</h1>
+       {Array.from(posts).map((post) => {
+          return (
+            <div className='border p-3 mt-2 text-center w-50'>
+            <div key={post.id}>
+              <h2 className='text-center'>{post.title}</h2>
+              <img src={post.image.url} className='w-75'></img>
+              <p>{post.description}</p>
+              {/* <img src={post.image.url}></img> */}
+              <p>{post.discountedPrice}$</p>
+              <p>Rating: {post.rating}</p>
+              {/* <h6>Reviews: {post.reviews[0].description}</h6> */}
+            </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
 function Contact() {
   // return <div>Contact</div>
@@ -55,7 +116,7 @@ function Contact() {
       }
     
       return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className='vh-100'>
           <input {...register('fullName')} />
           <p>{errors.fullName?.message}</p>
           <input {...register('email')} />
@@ -117,7 +178,7 @@ function Header() {
 function Footer() {
 
   return (
-    <MDBFooter className='text-center text-lg-left bottom-0 position-fixed w-100 bg-body-tertiary'>
+    <MDBFooter className='text-center text-lg-left bottom-0 w-100 bg-body-tertiary'>
     <div className='text-center p-3' >
       &copy; {new Date().getFullYear()} ECommerce Store{' '}
     </div>
