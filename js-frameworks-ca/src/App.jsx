@@ -3,13 +3,81 @@ import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import { Routes, Route, Outlet } from "react-router-dom";
+import { MDBFooter } from 'mdb-react-ui-kit';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-function NavScrollExample() {
+function Home() {
+  return <div>Home</div>
+}
+
+function Products() {
+  return <div>Products</div>
+}
+
+function Contact() {
+  // return <div>Contact</div>
+  const schema = yup
+  .object({
+    fullName: yup
+      .string()
+      .min(3, 'Your full name should be at least 3 characters.')
+      .max(50, 'Your full name cannot be longer than 50 characters.')
+      .required('Please enter your full name'),
+    email: yup
+      .string().email()
+      .required('Your email must be @noroff.no'),
+    subject: yup
+      .string()
+      .min(3, 'Your subject should be at least 3 characters.')
+      .max(100, 'Your subject cannot be longer than 1000 characters.')
+      .required('Please enter your subject'),
+    body: yup
+      .string()
+      .min(3, 'Your body should be at least 3 characters.')
+      .max(1000, 'Your body cannot be longer than 10 characters.')
+      .required('Please enter your body'),
+  })
+  .required();
+
+  const {
+        register,
+        handleSubmit,
+        formState: { errors },
+      } = useForm({
+        resolver: yupResolver(schema),
+      });
+    
+      function onSubmit(data) {
+        console.log(data);
+      }
+    
+      return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input {...register('fullName')} />
+          <p>{errors.fullName?.message}</p>
+          <input {...register('email')} />
+          <p>{errors.email?.message}</p>
+          <input {...register('subject')} />
+          <p>{errors.subject?.message}</p>
+          <input {...register('body')} />
+          <p>{errors.body?.message}</p>
+          <input type="submit" />
+        </form>
+      );
+}
+
+function RouteNotFound() {
+  return <div>Page not found</div>
+}
+
+function NavHeader() {
   return (
     <Navbar expand="md" className="bg-body-tertiary">
       <Container fluid>
-        <Navbar.Brand href="#">ECommerce Store</Navbar.Brand>
+        <Navbar.Brand href="/">ECommerce Store</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbarScroll" />
         <Navbar.Collapse id="navbarScroll">
           <Nav
@@ -17,9 +85,9 @@ function NavScrollExample() {
             style={{ maxHeight: '100px' }}
             navbarScroll
           >
-            <Nav.Link href="#action1">Home</Nav.Link>
-            <Nav.Link href="#action2">Product</Nav.Link>
-            <Nav.Link href="#action2">Contact</Nav.Link>
+            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/products">Products</Nav.Link>
+            <Nav.Link href="/contact">Contact</Nav.Link>
           </Nav>
           <Form className="d-flex">
             <Form.Control
@@ -36,7 +104,53 @@ function NavScrollExample() {
   );
 }
 
-export default NavScrollExample;
+// Our header component that gets used in our <Layout> component
+function Header() {
+  return (
+    <header>
+      <NavHeader />
+    </header>
+  )
+}
+
+// Our footer component that gets used in our <Layout> component
+function Footer() {
+
+  return (
+    <MDBFooter className='text-center text-lg-left bottom-0 position-fixed w-100 bg-body-tertiary'>
+    <div className='text-center p-3' >
+      &copy; {new Date().getFullYear()} ECommerce Store{' '}
+    </div>
+  </MDBFooter>
+  );
+}
+
+function Layout() {
+  return (
+    <div>
+      <Header />
+      <Outlet />
+      <Footer />
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="products" element={<Products />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="*" element={<RouteNotFound />} />
+        </Route>
+      </Routes>
+    </div>
+  )
+} 
+
+export default App;
 
 
 
